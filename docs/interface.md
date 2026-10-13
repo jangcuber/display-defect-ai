@@ -25,8 +25,10 @@ RGB가 필요하면 버전 변경을 합의하고 이 회색조 계약을 조용
 | `heatmap` | null 또는 [0,1]의 height × width 2차원 배열, 클수록 이상 위치 |
 | `provenance` | model_id, model_version, preprocessing_id, training_run_id, is_synthetic |
 
-`calibration is None`이면 언제나 `uncalibrated`입니다. 보정 정보가 있으면 `score >= threshold`일 때
-`anomaly`, 작으면 `normal`입니다. 판정을 따로 저장하거나 데모가 임계값을 임의로 정하지 않습니다.
+`calibration is None`이면 언제나 `uncalibrated`입니다. 보정 정보가 있으면 **`score > threshold`**일 때
+`anomaly`, 임계값과 같거나 작으면 `normal`입니다. 판정을 따로 저장하거나 데모가 임계값을 임의로 정하지 않습니다.
+초기 foundation의 `>=` 규칙을 통합 전 검토에서 엄격한 `>`로 수정했습니다. 초기 커밋을 사용한
+소비자는 동점 판정과 경계 테스트를 갱신해야 합니다. 필드와 schema_version `1.0`은 그대로 유지합니다.
 보정 정보에는 검증 분할과 방법을 기록합니다. 최종 테스트를 보고 임계값을 바꾸지 않습니다.
 단위 테스트의 임계값은 분기 확인용이며 실제 데이터 보정 결과가 아닙니다.
 

@@ -1,4 +1,5 @@
 import json
+import math
 import unittest
 from dataclasses import replace
 
@@ -16,9 +17,22 @@ class ContractTests(unittest.TestCase):
 
     def test_threshold_boundary_and_both_sides(self):
         calibration = Calibration(0.5, "synthetic-unit-test", "boundary test", "synthetic-only")
-        for score, expected in ((0.49, "normal"), (0.5, "anomaly"), (0.51, "anomaly")):
+        for score, expected in ((0.49, "normal"), (0.5, "normal"), (0.51, "anomaly")):
             with self.subTest(score=score):
                 self.assertEqual(replace(self.result, score=score, calibration=calibration).decision, expected)
+
+    def test_strict_threshold_adjacent_floats_and_json(self):
+        calibration = Calibration(0.5, "synthetic-unit-test", "boundary test", "synthetic-only")
+        cases = ((math.nextafter(0.5, -math.inf), "normal"),
+                 (0.5, "normal"),
+                 (math.nextafter(0.5, math.inf), "anomaly"))
+        for score, expected in cases:
+            with self.subTest(score=score):
+                result = replace(self.result, score=score, calibration=calibration)
+                payload = json.loads(json.dumps(result.to_dict(), allow_nan=False))
+                self.assertEqual(result.decision, expected)
+                self.assertEqual(payload["decision"], expected)
+                self.assertEqual(payload["calibration"]["threshold"], 0.5)
 
     def test_json_contract(self):
         payload = json.loads(json.dumps(self.result.to_dict(), allow_nan=False))

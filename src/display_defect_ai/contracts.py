@@ -89,7 +89,7 @@ class InferenceResult:
     def decision(self) -> str:
         if self.calibration is None:
             return "uncalibrated"
-        return "anomaly" if self.score >= self.calibration.threshold else "normal"
+        return "anomaly" if self.score > self.calibration.threshold else "normal"
 
     def to_dict(self) -> dict:
         """JSON-ready payload; null calibration means no threshold decision."""
