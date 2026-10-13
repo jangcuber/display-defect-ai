@@ -28,8 +28,9 @@ PYTHONPATH=src python -m unittest discover -s tests -v
 PYTHONPATH=src python -m display_defect_ai.cli tests/fixtures/synthetic/bright_patch.pgm
 ```
 
-foundation 기반 QA 브랜치에서는 25개 중 22개 통과, 3개 예상 실패가 기준입니다.
-예상 실패는 고쳐진 버그나 통과가 아닙니다. 이후 core 수정으로 결과가 달라지면
+foundation 기반 QA 브랜치에서는 26개 중 22개 통과, 4개 예상 실패가 기준입니다.
+예상 실패는 고쳐진 버그나 통과가 아닙니다. 통합 합의는 `score > threshold`일 때만 anomaly이며
+동점은 normal입니다. 원래 foundation의 `>=` 규칙과 기존 테스트는 core 담당자가 수정 중입니다. 이후 core 수정으로 결과가 달라지면
 [검토 기록](qa-review.md)과 비교하고 담당자에게 알립니다.
 
 ## 작은 과제 하나 — 약 2시간
@@ -54,7 +55,7 @@ foundation 기반 QA 브랜치에서는 25개 중 22개 통과, 3개 예상 실�
 
 1. 입력은 어디서 왔고 합성이라는 근거는 무엇인가요? marker는 진위를 인증하나요?
 2. 바꾼 줄의 입력·출력·실패 조건을 예 하나씩 설명할 수 있나요?
-3. threshold와 같은 score는 왜 anomaly인가요? calibration이 없으면 왜 미보정인가요?
+3. 합의된 엄격 경계에서 threshold와 같은 score는 왜 normal인가요? calibration이 없으면 왜 미보정인가요?
 4. 테스트 통과가 실제 결함 탐지 정확도를 뜻하지 않는 이유는 무엇인가요?
 5. test를 보고 threshold를 고르면 어떤 정보가 새어 나가나요?
 

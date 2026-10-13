@@ -60,7 +60,6 @@ class QAContractEdges(unittest.TestCase):
 
     def test_json_decision_matches_calibration_at_adjacent_float_boundary(self):
         for score, expected in ((math.nextafter(0.5, -math.inf), "normal"),
-                                (0.5, "anomaly"),
                                 (math.nextafter(0.5, math.inf), "anomaly")):
             with self.subTest(score=score):
                 result = replace(self.result, score=score, calibration=self.calibration)
@@ -167,3 +166,15 @@ class QAKnownContractDefects(unittest.TestCase):
     def test_non_string_image_id_must_raise_documented_value_error(self):
         with self.assertRaises(ValueError):
             ImageInput(None, 1, 1, ((0.5,),), True)
+
+    @unittest.expectedFailure
+    def test_equal_threshold_must_be_normal_under_agreed_strict_rule(self):
+        # Core integration decision: anomaly iff score > threshold. The exact
+        # foundation commit still uses >=; remove this marker after core lands.
+        provenance = Provenance("qa", "1", "qa", None, True)
+        calibration = Calibration(0.5, "qa-only", "boundary exercise", "synthetic-validation")
+        result = InferenceResult("qa", 1, 1, 0.5, None, provenance, calibration)
+        payload = json.loads(json.dumps(result.to_dict(), allow_nan=False))
+        self.assertEqual(result.decision, "normal")
+        self.assertEqual(payload["decision"], "normal")
+        self.assertEqual(payload["score"], payload["calibration"]["threshold"])
