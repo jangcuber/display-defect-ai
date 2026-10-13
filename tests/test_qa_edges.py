@@ -114,6 +114,17 @@ class QAContractEdges(unittest.TestCase):
             SyntheticSmokePredictor().predict(replace(self.image, is_synthetic=False))
 
 
+    def test_equal_threshold_must_be_normal_under_agreed_strict_rule(self):
+        # Canonical foundation 05b5748: anomaly iff score > threshold.
+        provenance = Provenance("qa", "1", "qa", None, True)
+        calibration = Calibration(0.5, "qa-only", "boundary exercise", "synthetic-validation")
+        result = InferenceResult("qa", 1, 1, 0.5, None, provenance, calibration)
+        payload = json.loads(json.dumps(result.to_dict(), allow_nan=False))
+        self.assertEqual(result.decision, "normal")
+        self.assertEqual(payload["decision"], "normal")
+        self.assertEqual(payload["score"], payload["calibration"]["threshold"])
+
+
 class QASyntheticLoaderEdges(unittest.TestCase):
     def read(self, text):
         with tempfile.TemporaryDirectory() as directory:
@@ -166,15 +177,3 @@ class QAKnownContractDefects(unittest.TestCase):
     def test_non_string_image_id_must_raise_documented_value_error(self):
         with self.assertRaises(ValueError):
             ImageInput(None, 1, 1, ((0.5,),), True)
-
-    @unittest.expectedFailure
-    def test_equal_threshold_must_be_normal_under_agreed_strict_rule(self):
-        # Core integration decision: anomaly iff score > threshold. The exact
-        # foundation commit still uses >=; remove this marker after core lands.
-        provenance = Provenance("qa", "1", "qa", None, True)
-        calibration = Calibration(0.5, "qa-only", "boundary exercise", "synthetic-validation")
-        result = InferenceResult("qa", 1, 1, 0.5, None, provenance, calibration)
-        payload = json.loads(json.dumps(result.to_dict(), allow_nan=False))
-        self.assertEqual(result.decision, "normal")
-        self.assertEqual(payload["decision"], "normal")
-        self.assertEqual(payload["score"], payload["calibration"]["threshold"])

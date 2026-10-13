@@ -28,9 +28,9 @@ PYTHONPATH=src python -m unittest discover -s tests -v
 PYTHONPATH=src python -m display_defect_ai.cli tests/fixtures/synthetic/bright_patch.pgm
 ```
 
-foundation 기반 QA 브랜치에서는 26개 중 22개 통과, 4개 예상 실패가 기준입니다.
+foundation 기반 QA 브랜치에서는 27개 중 24개 통과, 3개 예상 실패가 기준입니다.
 예상 실패는 고쳐진 버그나 통과가 아닙니다. 통합 합의는 `score > threshold`일 때만 anomaly이며
-동점은 normal입니다. 원래 foundation의 `>=` 규칙과 기존 테스트는 core 담당자가 수정 중입니다. 이후 core 수정으로 결과가 달라지면
+동점은 normal입니다. `05b5748` foundation의 엄격 경계와 기존 테스트를 통합했습니다. 이후 core 수정으로 결과가 달라지면
 [검토 기록](qa-review.md)과 비교하고 담당자에게 알립니다.
 
 ## 작은 과제 하나 — 약 2시간
