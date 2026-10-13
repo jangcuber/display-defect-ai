@@ -106,7 +106,7 @@ class DemoTests(unittest.TestCase):
     def test_optional_heatmap_and_calibration_are_preserved(self):
         result = SyntheticSmokePredictor().predict(load_image(self.path))
         for calibration, decision in ((None, "uncalibrated"),
-                                      (Calibration(1.0, "unit-test-only", "unit-test", "unit-test"), "anomaly")):
+                                      (Calibration(0.5, "unit-test-only", "unit-test", "unit-test"), "anomaly")):
             expected = replace(result, heatmap=None, calibration=calibration)
             self.session.predictor = Mock(predict=Mock(return_value=expected))
             actual = self.session.inspect(self.path, synthetic=True)
