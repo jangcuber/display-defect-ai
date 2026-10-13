@@ -86,7 +86,8 @@ GUI 확인은 위 3분 시연에 더해 잘못된 파일 선택, 취소, 긴 창
 
 ## 통합
 
-이 변경은 foundation `281eb3b3560ac8ad92f90c6488576a0d9073b2cb` 위의 `review/demo`입니다.
-PR 기준 브랜치는 `review/project-foundation`이며 변경 범위는 `demo/`뿐입니다.
-foundation 통합 후 리더가 데모 브랜치를 새 기준에 rebase하거나 데모 커밋만 cherry-pick하고,
-위 두 테스트 묶음과 GUI 확인을 다시 실행하세요. 데이터·가중치·개인정보는 커밋하지 마세요.
+독립 `review/demo`의 두 구현 커밋을 `review/project-foundation`에 통합했습니다.
+공유 계약의 엄격한 `score > threshold` 판정을 사용하며 동점은 normal입니다.
+저장소 루트에서 `python scripts/check.py`로 핵심·QA·데모 테스트를 함께 확인할 수 있습니다.
+헤드리스 환경에서는 테스트와 GUI 시작 실패 안내만 확인했습니다. 실제 창의 화면 배치·한글 글꼴·
+파일 선택·클릭 흐름은 데스크톱에서 수동 검증해야 합니다. 데이터·가중치·개인정보는 커밋하지 마세요.

@@ -25,13 +25,14 @@
 ```bash
 python --version
 PYTHONPATH=src python -m unittest discover -s tests -v
+python scripts/check.py
 PYTHONPATH=src python -m display_defect_ai.cli tests/fixtures/synthetic/bright_patch.pgm
 ```
 
-foundation 기반 QA 브랜치에서는 26개 중 22개 통과, 4개 예상 실패가 기준입니다.
-예상 실패는 고쳐진 버그나 통과가 아닙니다. 통합 합의는 `score > threshold`일 때만 anomaly이며
-동점은 normal입니다. 원래 foundation의 `>=` 규칙과 기존 테스트는 core 담당자가 수정 중입니다. 이후 core 수정으로 결과가 달라지면
-[검토 기록](qa-review.md)과 비교하고 담당자에게 알립니다.
+통합 브랜치에서는 핵심·독립 QA 31개와 헤드리스 데모 8개, 총 39개 테스트가 통과합니다.
+예상 실패와 건너뜀은 0개입니다. 엄격한 `score > threshold`일 때만 anomaly이며 동점은 normal입니다.
+수정 전 결함 재현과 통합 결과는 [검토 기록](qa-review.md)에서 구분합니다.
+예상 실패는 통과가 아닙니다. 결과가 달라지면 숨기지 말고 담당자에게 알립니다.
 
 ## 작은 과제 하나 — 약 2시간
 

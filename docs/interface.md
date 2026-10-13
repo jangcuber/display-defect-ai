@@ -56,4 +56,7 @@ assert payload["provenance"]["is_synthetic"] is True
 
 화면에는 항상 “합성 테스트 / 실제 성능 미검증” 표시를 유지하세요. 잘못된 입력은 `ValueError`,
 파일 접근 오류는 `OSError`로 전달합니다. 데모는 오류를 사용자 안내로 변환합니다.
+생성자는 필수 문자열·배열 구조·수치 범위를 검증합니다. `provenance`는 `Provenance` 객체,
+`calibration`은 `Calibration` 객체 또는 None이어야 합니다. JSON dict를 생성자에 그대로 전달하지 말고
+필요한 객체를 명시적으로 구성하세요. 잘못된 타입도 생성 시 `ValueError`로 거부합니다.
 필드 이름/좌표/점수 의미가 바뀌면 리더와 합의하고 계약·테스트·소비자를 함께 수정합니다.

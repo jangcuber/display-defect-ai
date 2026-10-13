@@ -16,6 +16,7 @@ Python 3.10 이상이 필요합니다. 저장소 루트에서 다음을 실행�
 python --version
 python scripts/generate_synthetic.py
 PYTHONPATH=src python -m unittest discover -s tests -v
+python scripts/check.py
 PYTHONPATH=src python -m display_defect_ai.cli tests/fixtures/synthetic/bright_patch.pgm
 ```
 
@@ -31,6 +32,10 @@ display-defect-smoke tests/fixtures/synthetic/flat.pgm
 ```
 
 패키지 설치가 어려우면 위의 `PYTHONPATH` 방식만 사용해도 됩니다. 모델 관련 대형 패키지는 아직 설치하지 않습니다.
+
+`python scripts/check.py`는 핵심·독립 QA·헤드리스 데모 테스트를 함께 실행하며 건너뜀이나
+예상 실패가 있으면 실패로 종료합니다. 로컬 데스크톱과 Tkinter가 있으면 `python demo/app.py`로
+[합성 이미지 검사 데모](demo/README.md)를 엽니다. 클라우드에서는 GUI 시각 검증을 수행하지 못했습니다.
 
 ## 코드 읽는 순서
 
@@ -49,6 +54,8 @@ display-defect-smoke tests/fixtures/synthetic/flat.pgm
 - [역할과 세션 인계](docs/ownership.md): 충돌을 피하는 파일 담당 범위
 - [8주 계획](docs/plan.md): 데이터 확보 전후의 완료 기준
 - [데이터·평가 규칙](docs/data.md): 출처, 분할, 누출 방지와 정직한 보고
+- [1주차 학습 안내](docs/learning/week-01.md): 실행·경계값·설명 연습
+- [독립 QA와 통합 결과](docs/learning/qa-review.md): 발견한 결함과 수정 검증
 
 이 저장소는 PUBLIC입니다. 실제 이미지, 가중치, 개인 정보, 토큰은 커밋하지 마세요.
 `.gitignore`는 실수 방지용이며 모든 민감 파일을 감지하지는 못합니다. AI가 작성한 코드도 담당자가

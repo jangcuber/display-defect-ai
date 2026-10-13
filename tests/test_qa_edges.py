@@ -146,31 +146,23 @@ class QASyntheticLoaderEdges(unittest.TestCase):
 
 
 class QAKnownContractDefects(unittest.TestCase):
-    """Expected failures track foundation defects; remove decorators after core fixes.
+    """Regression tests for independently reproduced and now repaired defects."""
 
-    These are not passes. See docs/learning/qa-review.md for severity and repros.
-    """
-
-    @unittest.expectedFailure
     def test_missing_provenance_must_be_rejected_at_construction(self):
         with self.assertRaises(ValueError):
             InferenceResult("qa", 1, 1, 0.5, None, None)
 
-    @unittest.expectedFailure
     def test_mapping_calibration_must_be_rejected_at_construction(self):
         provenance = Provenance("qa", "1", "qa", None, True)
         with self.assertRaises(ValueError):
             InferenceResult("qa", 1, 1, 0.5, None, provenance, {"threshold": 0.5})
 
-    @unittest.expectedFailure
     def test_non_string_image_id_must_raise_documented_value_error(self):
         with self.assertRaises(ValueError):
             ImageInput(None, 1, 1, ((0.5,),), True)
 
-    @unittest.expectedFailure
     def test_equal_threshold_must_be_normal_under_agreed_strict_rule(self):
-        # Core integration decision: anomaly iff score > threshold. The exact
-        # foundation commit still uses >=; remove this marker after core lands.
+        # Core integration decision: anomaly iff score > threshold.
         provenance = Provenance("qa", "1", "qa", None, True)
         calibration = Calibration(0.5, "qa-only", "boundary exercise", "synthetic-validation")
         result = InferenceResult("qa", 1, 1, 0.5, None, provenance, calibration)
@@ -178,3 +170,44 @@ class QAKnownContractDefects(unittest.TestCase):
         self.assertEqual(result.decision, "normal")
         self.assertEqual(payload["decision"], "normal")
         self.assertEqual(payload["score"], payload["calibration"]["threshold"])
+
+    def test_invalid_nested_object_types_are_rejected(self):
+        provenance = Provenance("qa", "1", "qa", None, True)
+        for value in ({}, "qa", 1, False):
+            with self.subTest(field="provenance", value=value), self.assertRaises(ValueError):
+                InferenceResult("qa", 1, 1, 0.5, None, value)
+            with self.subTest(field="calibration", value=value), self.assertRaises(ValueError):
+                InferenceResult("qa", 1, 1, 0.5, None, provenance, value)
+
+    def test_all_text_fields_reject_non_strings_with_value_error(self):
+        image = ImageInput("qa", 1, 1, ((0.5,),), True)
+        provenance = Provenance("qa", "1", "qa", "run", True)
+        calibration = Calibration(0.5, "qa", "method", "validation")
+        result = InferenceResult("qa", 1, 1, 0.5, None, provenance)
+        objects = ((image, ("image_id",)), (result, ("image_id",)),
+                   (provenance, ("model_id", "model_version", "preprocessing_id", "training_run_id")),
+                   (calibration, ("calibration_id", "method", "validation_split_id")))
+        for obj, fields in objects:
+            for field in fields:
+                for value in (None, 1, True, [], {}):
+                    if field == "training_run_id" and value is None:
+                        continue  # None explicitly represents no training run.
+                    with self.subTest(field=field, value=value), self.assertRaises(ValueError):
+                        replace(obj, **{field: value})
+
+    def test_invalid_grid_containers_raise_value_error(self):
+        image = ImageInput("qa", 1, 1, ((0.5,),), True)
+        result = SyntheticSmokePredictor().predict(image)
+        for grid in (None, 1, "0.5", {}, (None,), (0.5,), ("0.5",), ({},)):
+            with self.subTest(grid=grid), self.assertRaises(ValueError):
+                replace(image, pixels=grid)
+            if grid is not None:  # A missing heatmap is a supported result.
+                with self.subTest(heatmap=grid), self.assertRaises(ValueError):
+                    replace(result, heatmap=grid)
+
+    def test_unrepresentable_integers_raise_value_error(self):
+        huge = 10 ** 1000
+        with self.assertRaises(ValueError):
+            ImageInput("qa", 1, 1, ((huge,),), True)
+        with self.assertRaises(ValueError):
+            Calibration(huge, "qa", "method", "validation")

@@ -1,79 +1,61 @@
-# Foundation 독립 QA 인계
+# Foundation 독립 QA와 통합 결과
 
-검토 기준: `281eb3b3560ac8ad92f90c6488576a0d9073b2cb` (`review/project-foundation`).
-QA 브랜치: `review/qa-learning`. Python 3.12.14, 외부 의존성 없는 unittest 환경.
-`docs/interface.md`, `docs/ownership.md`, `docs/data.md`, `docs/plan.md`와 전체 소스/기존
-테스트를 읽었습니다. 저장소 및 작업공간의 `AGENTS.md`, `.agents/skills`는 없었습니다.
-변경은 새 `tests/test_qa_edges.py`와 `docs/learning/`에만 있습니다.
+초기 검토 기준은 `281eb3b3560ac8ad92f90c6488576a0d9073b2cb`입니다.
+독립 QA의 [초안 PR #2](https://github.com/jangcuber/display-defect-ai/pull/2)와
+데모의 [초안 PR #3](https://github.com/jangcuber/display-defect-ai/pull/3)는 별도 검토 기록입니다.
+QA 구현 커밋 `faedcec33b5140b7c1c953d28562e5413815d91a`, `19fa296c1aee025e00a1d7e4484c178fea850bb5`와
+데모 구현 커밋 `216f477777b966f632928aef05bc382aff34185d`, `46e7e5dc66a9ea2fa49ad6e551b7ef7929a8130d`를
+통합 리뷰 브랜치에 cherry-pick했습니다. 이후 브랜치의 merge 커밋은 가져오지 않았으며 main에 병합하지 않았습니다.
 
-## 재현 결과
+## 현재 검증 결과
 
-| 검사 | 결과 |
-|---|---|
-| 변경 전 `PYTHONPATH=src python -m unittest discover -s tests -v` | 기존 11개 통과, 실패 0 |
-| 변경 후 같은 명령 | 총 26개: 통과 22, 예상 실패 4, 일반 실패/오류 0, 건너뜀 0 |
-| 예상 실패 표시를 해제한 결함 재현 | 총 4개: assertion 실패 3, AttributeError 오류 1 |
-| `python scripts/generate_synthetic.py` 후 fixture diff | 변경 없음 |
-| flat / bright_patch CLI JSON | 각각 score 0 / 1, 모두 uncalibrated, 합성 출처 및 미학습 표시 확인 |
-| `git diff --check` | 통과 |
-| Python 3.10/3.11 및 Windows | 미실행 |
-| editable 설치 / 패키징 / 실제 이미지 / 모델 학습 / 성능 평가 | 미실행 |
-
-추가 15개 테스트 메서드는 NaN/±inf/비수치 입력, bool과 숫자 구별, 직사각형 좌표·행/열,
-정규화 범위와 score 범위 구별, 인접 부동소수점 threshold 경계, JSON 판정/보정 일치,
-필수 출처, 반복 실행, 합성 전용 입력, PGM 한계값과 marker를 검사합니다.
-subTest 사례 수를 독립 테스트 개수로 부풀리지 않았습니다.
-
-예상 실패는 수정 전 결함을 드러내면서 정상 회귀 검사를 실행하기 위한 표시입니다.
-`OK (expected failures=4)`를 “26개 통과”로 보고하지 마세요. core 수정 후 해당 decorator를
-제거하고 다시 실행합니다. 그 전에 수정이 들어오면 unexpected success가 되어 확인을 요구합니다.
-
-## core 담당자에게 전달할 결함
-
-| ID / 심각도 | 위치와 재현 | 영향 / 요청 |
-|---|---|---|
-| QA-01 / P2 보통 | `InferenceResult.__post_init__`: `InferenceResult("qa", 1, 1, 0.5, None, None)`이 생성되고 `to_dict()`에 provenance null 출력 | 필수 출처 계약을 벗어난 JSON이 유통될 수 있음. Provenance 객체 검증 요청. None뿐 아니라 dict 등 잘못된 타입도 검토 |
-| QA-02 / P2 보통 | 같은 생성자에 calibration `{"threshold": 0.5}` 전달 시 생성 성공, `decision`/`to_dict()` 접근 시 AttributeError | 생성 경계를 통과한 뒤 소비자가 실패함. None 또는 Calibration 검증 요청 |
-| QA-03 / P3 낮음 | `ImageInput(None, 1, 1, ((0.5,),), True)`가 ValueError 대신 AttributeError | 문서의 잘못된 입력 오류 규약 불일치. 문자열 필드의 타입 검사 및 grid 구조 오류도 함께 검토 요청 |
-| QA-04 / P2 보통 (통합 합의 반영 대기) | score=threshold=0.5에서 foundation은 anomaly 반환 | 합의된 규칙은 `score > threshold`만 anomaly, 동점은 normal. core 담당자가 구현·계약·기존 테스트를 함께 수정 예정 |
-
-2026-10-13 통합 지시에 따라 새 QA는 엄격한 `>` 경계를 기대합니다. 재확인한 원격 foundation
-`4015c09096b3556ca4b5181b3cc8c40f60c5e467`에는 데이터 문서만 추가되어 아직 `>=` 구현입니다.
-QA 브랜치는 요청한 정확한 원본 커밋을 부모로 유지합니다. 인접 양쪽 값 검사는 통과하며
-동점 검사는 별도 예상 실패입니다. 기존 `tests/test_contracts.py`의 동점 기대값은 소유 범위 밖이므로
-수정하지 않았습니다. core 변경을 통합한 뒤 기존 테스트·문서·QA가 함께 `>`를 사용하는지 확인하세요.
-
-현재 CLI 정상 경로는 올바른 객체를 직접 만들므로 QA-01~03의 직접 영향은 어댑터 통합 경계입니다.
-핵심 코드나 데모는 수정하지 않았습니다. 각 항목은 `QAKnownContractDefects`의 작은 테스트로 재현합니다.
-예상 실패를 숨기지 않고 실패/오류 자체를 확인하는 명령:
+Python 3.12.14에서 `python scripts/check.py`로 **39개 모두 통과**했습니다.
+핵심·독립 QA 31개와 헤드리스 데모 8개입니다. 일반 실패, 오류, 예상 실패, 예상 밖 성공, 건너뜀은 모두 0개입니다.
+subTest 사례 수는 독립 테스트 수로 부풀리지 않습니다. 이 통합 실행기는 건너뜀이나 예상 실패도 성공으로 보고하지 않습니다.
 
 ```bash
-PYTHONPATH=src:tests python - <<'PY'
-import unittest
-from test_qa_edges import QAKnownContractDefects
-for name in unittest.defaultTestLoader.getTestCaseNames(QAKnownContractDefects):
-    getattr(QAKnownContractDefects, name).__unittest_expecting_failure__ = False
-suite = unittest.defaultTestLoader.loadTestsFromTestCase(QAKnownContractDefects)
-result = unittest.TextTestRunner(verbosity=2).run(suite)
-raise SystemExit(not result.wasSuccessful())
-PY
+python scripts/check.py
+PYTHONPATH=src python -m unittest discover -s tests -v
+PYTHONPATH=src python -m unittest discover -s demo -v
 ```
 
-## 보호장치의 한계
+PowerShell에서는 개별 명령 전에 `$env:PYTHONPATH="src"`를 설정하고 `PYTHONPATH=src` 부분을 빼세요.
+통합 실행기는 별도 PYTHONPATH 설정 없이 동작합니다.
 
-명시적 `is_synthetic=False`와 marker 없는 PGM은 거부됩니다. 하지만 marker와 boolean은
-호출자가 제공하는 선언이지 이미지의 실제 출처를 인증하는 장치가 아닙니다. 실제 이미지를
-합성이라고 다시 표시해 이 대역에 넣지 마세요. 출처 권한과 분할은 별도 기록으로 확인합니다.
-출처 필드가 있다는 사실만으로 유효한 학습·보정·누출 방지가 증명되지는 않습니다.
+## 발견한 결함과 수정
 
-현재 실제 데이터·학습된 탐지기·실제 성능 측정은 없습니다. score/heatmap/단위 테스트 threshold는
-합성 연결 검사에만 사용합니다. test로 전처리나 threshold를 선택하지 않고, 데이터 확보 이후
-그룹 분할·실행 버전/시드/설정·학습 및 보정 출처를 고정해야 합니다. AI 작성 코드도 같은 기준을 적용합니다.
+| ID / 초기 심각도 | 재현된 문제 | 통합 수정과 회귀 검사 |
+|---|---|---|
+| QA-01 / P2 | provenance=None이 생성되어 필수 출처 없는 JSON 출력 | Provenance 객체를 생성 시 검증. None·dict·문자열·숫자·bool 거부 |
+| QA-02 / P2 | dict calibration이 생성된 뒤 decision에서 AttributeError | Calibration 객체 또는 None만 허용하고 생성 시 ValueError |
+| QA-03 / P3 | ImageInput(None, ...)이 ValueError 대신 AttributeError | 모든 필수 문자열 타입 검증, 잘못된 grid 구조와 수치도 ValueError |
+| QA-04 / P2 | 초기 >= 규칙에서 score=threshold를 anomaly로 분류 | 합의된 엄격한 >로 통일. 동점은 normal, 인접 부동소수점과 JSON 경계 확인 |
 
-## 통합 순서
+기존 결함 재현 테스트 네 개의 expectedFailure 표시를 제거했습니다. 누락 출처·보정 dict·잘못된 ID는
+수정 전 다시 실행해 assertion 실패 2개와 AttributeError 1개를 재현했습니다. 비교 규칙은 이미 수정되어
+그 시점에 동점 테스트는 통과했습니다. 수정 후 모든 재현이 실제 통과합니다.
 
-1. foundation 기준 stacked draft PR에서 두 학습 문서와 새 QA 파일만 검토합니다.
-2. core 담당자는 QA-01~04를 자신의 범위에서 수정하고 해당 재현을 실행합니다.
-3. QA 담당자는 고친 항목의 expectedFailure를 제거해 실제 통과를 확인합니다.
-4. 통합 담당자는 foundation 위에 QA 커밋을 cherry-pick하거나 승인된 PR 절차를 사용합니다.
-   자동 merge는 하지 않습니다. 다른 기반에 적용하면 전체 테스트와 CLI를 다시 실행합니다.
+추가로 문자열 필드 전체의 잘못된 타입, grid 컨테이너, 중첩 객체, float 변환 범위를 넘는 정수를 검사합니다.
+잘못된 타입을 뒤늦게 소비자에서 실패시키지 않고 생성 경계에서 ValueError로 거부합니다.
+
+## 독립 QA의 초기 결과 기록
+
+원본 foundation 테스트는 11개 통과했습니다. comparator 변경 전 QA 보고의 총 26개는
+**22개 통과와 4개 예상 실패**였으며, 26개 통과를 뜻하지 않습니다. 그 당시의 설치·GUI·실데이터 검사는
+실행되지 않았습니다. 이 과거 결과를 현재 통합 상태와 혼동하지 마세요.
+
+## 추가 검증과 남은 한계
+
+통합 후 compileall, fixture 재생성 일치, whitespace, 오프라인 editable 설치, 설치된 CLI의 두 fixture,
+문서 내부 링크와 ignore 규칙 검사를 모두 통과했습니다. GUI는 화면 없는 환경에서 안내 메시지를 출력하고
+종료 코드 1로 끝나는 것을 확인했으며 traceback은 없었습니다. 최종 PR에도 실행 결과를 기록합니다.
+Python 3.10/3.11과 Windows에서는 실행하지 않았습니다. GUI 시각 검증은 헤드리스 클라우드에서
+불가능했으며 데스크톱의 한글 글꼴·레이아웃·파일 선택·클릭 흐름을 별도로 확인해야 합니다.
+
+명시적 is_synthetic=False와 marker 없는 PGM은 거부되지만 marker와 boolean은 호출자의 선언이지
+실제 출처를 인증하는 장치가 아닙니다. 실제 이미지에 합성 표시를 붙여 넣지 마세요.
+출처 필드의 존재만으로 학습·보정·누출 방지가 증명되지는 않습니다.
+
+현재 실제 데이터·학습된 탐지기·실제 성능 측정은 없습니다. score·heatmap·테스트 threshold는
+합성 연결 검사에만 사용합니다. test로 전처리나 threshold를 선택하지 않고, 데이터 확보 후
+그룹 분할·버전·시드·학습 및 보정 출처를 고정해야 합니다. AI 작성 코드도 같은 기준을 적용합니다.
