@@ -88,7 +88,7 @@ def main() -> int:
             else:
                 draw(canvases[1], result.heatmap, heatmap=True)
             decision = {"uncalibrated": "미보정 — 정상/불량 판정 없음",
-                        "normal": "보정 기준 미만 (normal)", "anomaly": "보정 기준 이상 (anomaly)"}[result.decision]
+                        "normal": "보정 판정: normal", "anomaly": "보정 판정: anomaly"}[result.decision]
             threshold = "없음" if result.calibration is None else str(result.calibration.threshold)
             summary.set(f"합성 결과 · {result.width}×{result.height} · 점수 {result.score:.6g}\n{decision} · 임계값: {threshold}")
             payload = result.to_dict()
