@@ -10,9 +10,9 @@ htmlcov/
 .env
 .env.*
 !.env.example
-data/
-artifacts/
-outputs/
+/data/
+/artifacts/
+/outputs/
 *.pt
 *.pth
 *.ckpt
