@@ -2,7 +2,7 @@
 
 공유 기준은 `src/display_defect_ai/contracts.py`입니다. 외부 라이브러리 없이 import할 수 있습니다.
 데모는 `Predictor.predict(image: ImageInput) -> InferenceResult`만 호출합니다.
-모델 담당은 이 프로토콜을 만족하는 어댑터를 제공합니다. API 서버나 GUI는 아직 없습니다.
+모델 담당은 이 프로토콜을 만족하는 어댑터를 제공합니다. 기존 Tkinter 합성 GUI는 이 계약을 사용합니다.
 
 ## 입력
 
@@ -60,3 +60,19 @@ assert payload["provenance"]["is_synthetic"] is True
 `calibration`은 `Calibration` 객체 또는 None이어야 합니다. JSON dict를 생성자에 그대로 전달하지 말고
 필요한 객체를 명시적으로 구성하세요. 잘못된 타입도 생성 시 `ValueError`로 거부합니다.
 필드 이름/좌표/점수 의미가 바뀌면 리더와 합의하고 계약·테스트·소비자를 함께 수정합니다.
+
+## 학습 데이터 계약 v1 (기존 추론 계약과 별개)
+
+- `images/{train,val,test}/*.png`: RGB 의미의 컬러 이미지(OpenCV 배열은 BGR), 현재 정사각 512픽셀.
+- `labels/{train,val,test}/*.txt`: 같은 stem, 행마다 `class cx cy width height`.
+  좌표는 최종 촬영 이미지 크기로 나눈 [0,1] 값. 클래스 0=dot, 1=line.
+  정상은 별도 클래스가 아니라 빈 라벨 파일입니다.
+- `manifest.jsonl`: 이미지별 source_case_id, content_id, split, 생성 조건, 원근 행렬,
+  원본 결함 조건, 최종 픽셀 bbox_xyxy를 기록합니다. x2/y2는 포함하지 않는 상한입니다.
+- 박스는 원근 변환한 결함 마스크에 흐림 여유 2픽셀을 더한 외접 사각형입니다.
+- `dataset.yaml`: YOLO 데이터 경로/클래스. 이동 후 path를 새 데이터 루트로 바꿉니다.
+
+실제 YOLO 추론은 별도 detection 계약으로 boxes/class/confidence와 원본 좌표를 다뤄야 합니다.
+현재 회색조 v1의 score/heatmap에 검출 결과를 억지로 넣지 않습니다. detection 출력 구현은 다음 세션에서
+공유 계약·소비자와 함께 추가합니다. confidence는 불량 확률로 해석하지 않습니다.
+사진별 종합 판정은 검증한 클래스별 confidence/크기/개수 등의 규칙과 rule_id를 기록해야 하며 아직 미구현입니다.

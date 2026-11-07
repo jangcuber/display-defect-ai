@@ -26,3 +26,12 @@
 커밋되지 않은 수정이 자동 전달되지 않습니다. 승인된 리뷰 브랜치와 정확한 커밋을 인계하고
 각 세션은 그 커밋에서 별도 브랜치를 시작합니다. 게시 전 테스트와 공개 파일 목록을 확인합니다.
 push/PR은 사용자가 승인한 범위에서만 수행하며 merge/배포는 별도 승인이 필요합니다.
+
+## 현재 프로젝트 기반·데이터 생성 세션
+
+이번 세션은 사용자 지정에 따라 README/계획/인터페이스/역할 문서를 갱신하고
+`scripts/generate_dataset.py`, `scripts/check_dataset.py`, `requirements/generation.txt`를 담당합니다.
+기존 contracts.py, 합성 PGM·GUI 및 39개 테스트는 보존합니다.
+다음 모델 학습 세션은 [생성 인계](generation-handoff.md)를 읽고 OpenCV 기준과 YOLO26n 학습을 진행합니다.
+현재 work HEAD는 review/project-foundation 원격의 35b7eb9와 같았고 시작 시 미커밋 변경은 없었습니다.
+기존 클라우드 초안의 설치·시작 안내는 이전 PGM 워크플로였으며 생성기 의존성을 추가 갱신합니다.
