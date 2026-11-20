@@ -1,0 +1,12 @@
+{
+  "generator_version": 1,
+  "seed": 42,
+  "cases": 30,
+  "variants": 2,
+  "size": 512,
+  "content_id": "builtin-gray-180-v1",
+  "images": 180,
+  "numpy": "2.3.5",
+  "opencv": "4.14.0",
+  "seconds": 4.550312838999986
+}
