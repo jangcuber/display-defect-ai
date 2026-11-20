@@ -1,0 +1,6 @@
+# Build with Apple Silicon Python 3.12 from a runtime compatible with macOS 15.
+torch==2.15.0
+numpy==2.5.4
+opencv-python==5.0.0.93
+pillow==13.0.0
+pyinstaller==6.22.3

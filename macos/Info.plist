@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleIdentifier</key><string>local.displaydefect.white-screen-inspector</string>
+    <key>CFBundleExecutable</key><string>WhiteScreenInspector</string>
+    <key>CFBundleName</key><string>White Screen Inspector</string>
+    <key>CFBundleDisplayName</key><string>흰 화면 검사</string>
+    <key>CFBundlePackageType</key><string>APPL</string>
+    <key>CFBundleShortVersionString</key><string>0.4</string>
+    <key>CFBundleVersion</key><string>4</string>
+    <key>LSMinimumSystemVersion</key><string>15.0</string>
+</dict>
+</plist>

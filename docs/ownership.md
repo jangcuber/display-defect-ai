@@ -35,3 +35,10 @@ push/PR은 사용자가 승인한 범위에서만 수행하며 merge/배포는 �
 다음 모델 학습 세션은 [생성 인계](generation-handoff.md)를 읽고 OpenCV 기준과 YOLO26n 학습을 진행합니다.
 현재 work HEAD는 review/project-foundation 원격의 35b7eb9와 같았고 시작 시 미커밋 변경은 없었습니다.
 기존 클라우드 초안의 설치·시작 안내는 이전 PGM 워크플로였으며 생성기 의존성을 추가 갱신합니다.
+
+### 사용자 요청에 따른 범위 확장
+
+같은 세션에서 전체 짝 데이터·픽셀 마스크 생성, U-Net/YOLO26n 학습·공통 평가와 맥 앱 교체까지
+사용자가 요청했습니다. 관련 생성·학습·추론 스크립트, 별도 OLED v3 앱 계약과 Swift 앱을 추가했습니다.
+기존 v1 공유 계약·PGM 데모·39개 테스트는 유지합니다. 최신 인계는
+[생성 인계](generation-handoff.md)와 [모델 비교](native-comparison.md)를 함께 확인합니다.
